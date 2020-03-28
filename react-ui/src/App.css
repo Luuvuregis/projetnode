@@ -30,3 +30,15 @@
     transform: rotate(360deg);
   }
 }
+
+.customNavLink{
+  color: white;
+}
+
+.customNavLink:hover{
+  color: salmon;
+}
+
+.custom-nav {
+  padding:10px;
+}

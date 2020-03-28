@@ -1,68 +1,31 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import logo from './logo.svg';
+import React from 'react';
+import NavBar from './NavBar';
+import RegisterForm from './RegisterForm';
 import './App.css';
+import LoginForm from './LoginForm';
 
-function App() {
-  const [message, setMessage] = useState(null);
-  const [isFetching, setIsFetching] = useState(false);
-  const [url, setUrl] = useState('/api');
+class App extends React.Component {
 
-  const fetchData = useCallback(() => {
-    fetch(url)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`status ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(json => {
-        setMessage(json.message);
-        setIsFetching(false);
-      }).catch(e => {
-        setMessage(`API call failed: ${e}`);
-        setIsFetching(false);
-      })
-  }, [url]);
+  constructor(props) {
+    super(props)
+    this.state = {results: []};
+  }
 
-  useEffect(() => {
-    setIsFetching(true);
-    fetchData();
-  }, [fetchData]);
+  componentDidMount() {
+    fetch('http://localhost:5000/')
+      .then(res => res.json())
+      .then(data => {this.setState({results: data});console.log(data)});
+  }
 
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        { process.env.NODE_ENV === 'production' ?
-            <p>
-              This is a production build from create-react-app.
-            </p>
-          : <p>
-              Edit <code>src/App.js</code> and save to reload.
-            </p>
-        }
-        <p>{'« '}<strong>
-          {isFetching
-            ? 'Fetching message from API'
-            : message}
-        </strong>{' »'}</p>
-        <p><a
-          className="App-link"
-          href="https://github.com/mars/heroku-cra-node"
-        >
-          React + Node deployment on Heroku
-        </a></p>
-        <p><a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a></p>
-      </header>
-    </div>
-  );
+  render() {
+    return (
+      <div>
+        <NavBar />
+        <RegisterForm />
+        <LoginForm />
+      </div>
+    );
+  };
 
 }
 
