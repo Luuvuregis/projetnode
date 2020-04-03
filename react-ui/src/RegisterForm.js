@@ -4,14 +4,14 @@ class RegisterForm extends React.Component {
     constructor(props) {
       super(props);
       this.state = {name: '', pwd: '', confirmPwd: '', alertMessage: '', alertClass: ''};
-      this.handleChangeName = this.handleChangeName.bind(this);
-      this.handleChangePwd = this.handleChangePwd.bind(this);
+      this.handleLoginChangeName = this.handleLoginChangeName.bind(this);
+      this.handleLoginChangePwd = this.handleLoginChangePwd.bind(this);
       this.handleChangeConfirm = this.handleChangeConfirm.bind(this);
       this.handleSubmit = this.handleSubmit.bind(this);
     }
   
-    handleChangeName(event) {    this.setState({name: event.target.value});  }
-    handleChangePwd(event) {    this.setState({pwd: event.target.value});  }
+    handleLoginChangeName(event) {    this.setState({name: event.target.value});  }
+    handleLoginChangePwd(event) {    this.setState({pwd: event.target.value});  }
     handleChangeConfirm(event) {    this.setState({confirmPwd: event.target.value});  }
     handleSubmit(event) {
       alert('Le nom a été soumis : ' + this.state.name);
@@ -46,11 +46,11 @@ class RegisterForm extends React.Component {
 
                 <div class="modal-body">
                   <div class="form-group">
-                    <label for="InputPseudo"> What's your pseudo : <input type="text" class="form-control form-control-lg" value={this.state.name} onChange={this.handleChangeName} /></label>
+                    <label for="InputPseudo"> What's your pseudo : <input type="text" class="form-control form-control-lg" value={this.state.name} onChange={this.handleLoginChangeName} /></label>
                   </div>
 
                   <div class="form-group">
-                    <label for="InputPassword"> Gimme your password : <input type="password" class="form-control form-control-lg" value={this.state.pwd} onChange={this.handleChangePwd} /></label>
+                    <label for="InputPassword"> Gimme your password : <input type="password" class="form-control form-control-lg" value={this.state.pwd} onChange={this.handleLoginChangePwd} /></label>
                   </div>
 
                   <div class="form-group">
