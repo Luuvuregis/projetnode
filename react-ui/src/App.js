@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import RegisterForm from './RegisterForm';
+import SettingsForm from './SettingsForm'
 import './App.css';
 
 class App extends React.Component {
@@ -36,7 +37,10 @@ class App extends React.Component {
           this.setState({inputNameType: "hidden"});
           this.setState({inputPwdType: "hidden"});
           this.setState({inputSubmitType: "hidden"});
-          localStorage.setItem("isConnected", true)
+          localStorage.setItem("isConnected", true);
+          localStorage.setItem("nameUser", data.nameUser);
+          localStorage.setItem("idUser", data.idUser);
+          console.log("loaded data :" + data.idUser);
         }
         this.setState({alertMessage: data.message})
         this.setState({isConnected: data.success});
@@ -61,31 +65,34 @@ class App extends React.Component {
       console.log()
   }
 
-  componentWillUnmount() {
-
-  }
-
   render() {
-    let connectLink, registrationLink;
-      if (this.state.isConnected || localStorage.getItem("isConnected")) {
-        connectLink = <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" onClick={this.handleDisconnect} href="#">Logout</a></li>
-        registrationLink = '';
-      } else {
-        connectLink = <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#LoginFormId">Login</a></li>
-        registrationLink = <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#registrationFormId">Register</a></li>
-      }
-
+    let connectLink, registrationLink, profilLinks, searchBar;
 
     return (
       <div>
         <ul class="nav justify-content-center bg-dark">
           <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#">Home <span className="sr-only">(current)</span></a></li>
           <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#">About</a></li>
-          {registrationLink}
-          {connectLink}
-      </ul>
+
+          {(!this.state.isConnected && !localStorage.getItem("isConnected")) && 
+            <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#registrationFormId">Register</a></li> &&
+            <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#LoginFormId">Login</a></li>
+          }
+          {(this.state.isConnected && localStorage.getItem("isConnected")) && 
+            <li class="nav-item dropdown custom-nav">
+              <a class="nav-link dropdown-toggle customNavLink" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Profile</a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#"  data-toggle="modal" data-target="#settingsFormId">Settings</a>
+                <div class="dropdown-divider"></div>
+                <a className="nav-item nav-link dropdown-item" onClick={this.handleDisconnect} href="#">Logout</a>
+              </div>
+            </li>
+          }
+          
+        </ul>
 
         <RegisterForm />
+        <SettingsForm idUser={localStorage.getItem("idUser")} nameUser={localStorage.getItem("nameUser")} />
         
         <div class="modal fade" show={this.state.showModal} id="LoginFormId" tabindex="-1" role="dialog" aria-labelledby="LoginModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" role="document">

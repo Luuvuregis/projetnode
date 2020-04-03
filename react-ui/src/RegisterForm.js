@@ -64,7 +64,7 @@ class RegisterForm extends React.Component {
                   </div>
                   <br/>
                   <div class="form-group">
-                    <input type="submit" value="Envoyer" />
+                    <input type="submit" class="btn btn-primary" value="Submit" />
                   </div>
                 </div>
 
