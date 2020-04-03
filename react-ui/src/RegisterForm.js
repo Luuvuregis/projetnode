@@ -3,15 +3,17 @@ import React from 'react';
 class RegisterForm extends React.Component {
     constructor(props) {
       super(props);
-      this.state = {name: '', pwd: '', confirmPwd: '', alertMessage: '', alertClass: ''};
-      this.handleLoginChangeName = this.handleLoginChangeName.bind(this);
-      this.handleLoginChangePwd = this.handleLoginChangePwd.bind(this);
+      this.state = {name: '', pwd: '', confirmPwd: '', email: '', alertMessage: '', alertClass: ''};
+      this.handleRegisterChangeEmail = this.handleRegisterChangeEmail.bind(this);
+      this.handleRegisterChangeName = this.handleRegisterChangeName.bind(this);
+      this.handleRegisterChangePwd = this.handleRegisterChangePwd.bind(this);
       this.handleChangeConfirm = this.handleChangeConfirm.bind(this);
       this.handleSubmit = this.handleSubmit.bind(this);
     }
   
-    handleLoginChangeName(event) {    this.setState({name: event.target.value});  }
-    handleLoginChangePwd(event) {    this.setState({pwd: event.target.value});  }
+    handleRegisterChangeEmail(event) {  this.setState({email: event.target.value}) };
+    handleRegisterChangeName(event) {    this.setState({name: event.target.value});  }
+    handleRegisterChangePwd(event) {    this.setState({pwd: event.target.value});  }
     handleChangeConfirm(event) {    this.setState({confirmPwd: event.target.value});  }
     handleSubmit(event) {
       alert('Le nom a été soumis : ' + this.state.name);
@@ -20,12 +22,14 @@ class RegisterForm extends React.Component {
               user: {
                   name: this.state.name,
                   pwd: this.state.pwd,
-                  confirmPwd: this.state.confirmPwd
+                  confirmPwd: this.state.confirmPwd,
+                  email: this.state.email
               }
           })
       })
       .then(res => res.json())
       .then(data => {
+          console.log(data.message)
           this.setState({alertMessage: data.message});
           if(data.success)  this.setState({alertClass: "alert alert-success"});
           else              this.setState({alertClass: "alert alert-danger"});
@@ -46,11 +50,15 @@ class RegisterForm extends React.Component {
 
                 <div class="modal-body">
                   <div class="form-group">
-                    <label for="InputPseudo"> What's your pseudo : <input type="text" class="form-control form-control-lg" value={this.state.name} onChange={this.handleLoginChangeName} /></label>
+                    <label for="InputEmail"> What's your email : <input type="text" class="form-control form-control-lg" value={this.state.email} onChange={this.handleRegisterChangeEmail} /></label>
                   </div>
 
                   <div class="form-group">
-                    <label for="InputPassword"> Gimme your password : <input type="password" class="form-control form-control-lg" value={this.state.pwd} onChange={this.handleLoginChangePwd} /></label>
+                    <label for="InputPseudo"> What's your pseudo : <input type="text" class="form-control form-control-lg" value={this.state.name} onChange={this.handleRegisterChangeName} /></label>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="InputPassword"> Gimme your password : <input type="password" class="form-control form-control-lg" value={this.state.pwd} onChange={this.handleRegisterChangePwd} /></label>
                   </div>
 
                   <div class="form-group">
@@ -60,7 +68,7 @@ class RegisterForm extends React.Component {
 
                 <div class="modal-footer">
                   <div class="form-group">
-                    <span class={this.state.alertClass} role="alert">{this.state.alertMessage}</span>
+                    <div class={this.state.alertClass} role="alert">{this.state.alertMessage}</div>
                   </div>
                   <br/>
                   <div class="form-group">

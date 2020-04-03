@@ -69,29 +69,52 @@ else {
     });
   });
 
+  /**
+   * 
+   * USER REGISTRATION TO WEBSITE
+   * 
+   */
   app.post('/register', function(request, response){
     const nameUser = request.body.user.name;
     const pwdUser = request.body.user.pwd;
     const confirmPwd = request.body.user.confirmPwd;
+    const emailUser = request.body.user.email;
     var data = { message: '', success: false };
-    if(pwdUser != confirmPwd) data.message = "the passwords are differents";
-    else if(pwdUser.trim().length < 8) data.message = "the password is too short (at least 8 characters)";
+    if(pwdUser != confirmPwd) {data.message = "the passwords are differents"; response.send(JSON.stringify(data));}
+    else if(pwdUser.trim().length < 8) {data.message = "the password is too short (at least 8 characters)"; response.send(JSON.stringify(data));}
     else {
-      data.message = "The registration is truly a success";
-      data.success = true;
       const client = new Client(clientLogins);
       client.connect();
-      bcrypt.hash(pwdUser, saltRounds)
-        .then(function(hash) {
-          const query = `INSERT INTO users.users("nameUser", "pwdUser") VALUES ('${nameUser}', '${hash}')`;
-          console.log(query);
-          client.query(query, (err, res2) => {console.log(err, res2); client.end();});
-        });
+      const queryCheck = `SELECT * FROM users.users where "nameUser" = '${nameUser}' OR "emailUser" = '${emailUser}'`;
+      client.query(queryCheck, (err, res2) => {
+        if(res2.rows.length > 0) {
+          data.message = res2.rows[0].nameUser == nameUser ? "This pseudo already exists" : "This email already exists";
+          response.send(JSON.stringify(data));
+        }
+        else {
+          data.message = "The registration is truly a success. You can now login to the website.";
+          data.success = true;
+          const client2 = new Client(clientLogins);
+          client2.connect();
+          bcrypt.hash(pwdUser, saltRounds)
+          .then(function(hash) {
+            const queryRegister = `INSERT INTO users.users("nameUser", "pwdUser", "emailUser") VALUES ('${nameUser}', '${hash}', '${emailUser}')`;
+            client2.query(queryRegister, (err1, res3) => {console.log(err1, res3); client2.end();});
+            response.send(JSON.stringify(data));
+          });
+        }
+        client.end();
+      });
+
     }
-    response.send(JSON.stringify(data));
   });
 
 
+  /**
+   * 
+   * USER AUTHENTIFICATION TO WEBSITE
+   * 
+   */
   app.post('/login', function(request, response){
     const nameUser = request.body.user.name;
     const pwdUser = request.body.user.pwd;
@@ -99,16 +122,18 @@ else {
     const query = `SELECT * FROM users.users where "nameUser" = '${nameUser}'`;
     client.connect();
     client.query(query, (err, res1) => {
-      var data = {message : 'Password/Pseudo are wrong', success: false};
+      var data = {message : 'Password/Pseudo are wrong', success: false, id: '', nameUser: ''};
       //console.log(res1.rows.length);
       //console.log(res1.rows[0].pwdUser);
       if(res1.rows.length == 1) {
         var hash = res1.rows[0].pwdUser
         bcrypt.compare(pwdUser, hash).then(function(result) {
           if(result)
-          { 
+          {
             data.success = true; 
-            data.message = 'Welcome !';
+            data.message = 'Welcome ! The authentification is a success. You can now close this form.';
+            data.idUser = res1.rows[0].idUser;
+            data.nameUser = res1.rows[0].nameUser;
           }
           response.send(data);
           client.end();

@@ -73,9 +73,10 @@ class App extends React.Component {
         <ul class="nav justify-content-center bg-dark">
           <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#">Home <span className="sr-only">(current)</span></a></li>
           <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#">About</a></li>
-
           {(!this.state.isConnected && !localStorage.getItem("isConnected")) && 
-            <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#registrationFormId">Register</a></li> &&
+            <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#registrationFormId">Register</a></li>
+          }
+          {(!this.state.isConnected && !localStorage.getItem("isConnected")) && 
             <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#LoginFormId">Login</a></li>
           }
           {(this.state.isConnected && localStorage.getItem("isConnected")) && 
@@ -88,7 +89,7 @@ class App extends React.Component {
               </div>
             </li>
           }
-          
+
         </ul>
 
         <RegisterForm />
