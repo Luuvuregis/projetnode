@@ -3,27 +3,33 @@ import React from 'react';
 class RegisterForm extends React.Component {
     constructor(props) {
       super(props);
-      this.state = {name: '', pwd: '', confirmPwd: '', email: '', alertMessage: '', alertClass: ''};
+      this.state = {name: '', pwd: '', confirmPwd: '', email: '', alertMessage: '', alertClass: '', currentLocalisation: 0,
+        localisations : [{"idLocalisation":0, "nameLocalisation":'Choose a localisation'}]
+      };
       this.handleRegisterChangeEmail = this.handleRegisterChangeEmail.bind(this);
       this.handleRegisterChangeName = this.handleRegisterChangeName.bind(this);
+      this.handleRegisterChangeLocalisation = this.handleRegisterChangeLocalisation.bind(this);
       this.handleRegisterChangePwd = this.handleRegisterChangePwd.bind(this);
       this.handleChangeConfirm = this.handleChangeConfirm.bind(this);
       this.handleSubmit = this.handleSubmit.bind(this);
     }
   
+    handleRegisterChangeLocalisation(event) {  this.setState({currentLocalisation: event.target.value}) };
     handleRegisterChangeEmail(event) {  this.setState({email: event.target.value}) };
     handleRegisterChangeName(event) {    this.setState({name: event.target.value});  }
     handleRegisterChangePwd(event) {    this.setState({pwd: event.target.value});  }
     handleChangeConfirm(event) {    this.setState({confirmPwd: event.target.value});  }
     handleSubmit(event) {
       alert('Le nom a été soumis : ' + this.state.name);
+      //console.log(this.state.currentLocalisation)
       fetch("/register", {method: "POST", headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
               user: {
                   name: this.state.name,
                   pwd: this.state.pwd,
                   confirmPwd: this.state.confirmPwd,
-                  email: this.state.email
+                  email: this.state.email,
+                  localisation: this.state.currentLocalisation
               }
           })
       })
@@ -36,8 +42,18 @@ class RegisterForm extends React.Component {
         });
       event.preventDefault();
     }
+
+    componentDidMount() {
+      fetch('http://localhost:5000/getAllLocalisations')
+      .then(res => res.json())
+      .then(data => {
+        var joined = this.state.localisations.concat(data);
+        this.setState({localisations: joined});console.log(this.state.localisations)});
+    }
   
     render() {
+      const localisations = this.state.localisations.map((localisation) => <option value={localisation.idLocalisation}>{localisation.nameLocalisation}</option>)
+
       return (
         <div class="modal fade" id="registrationFormId" tabindex="-1" role="dialog" aria-labelledby="RegistrationModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" role="document">
@@ -55,6 +71,10 @@ class RegisterForm extends React.Component {
 
                   <div class="form-group">
                     <label for="InputPseudo"> What's your pseudo : <input type="text" class="form-control form-control-lg" value={this.state.name} onChange={this.handleRegisterChangeName} /></label>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="SelectLocalisation"> What's your localisation : <select class="form-control form-control-lg" name="localisations" onChange={this.handleRegisterChangeLocalisation}>{localisations}</select></label>
                   </div>
 
                   <div class="form-group">

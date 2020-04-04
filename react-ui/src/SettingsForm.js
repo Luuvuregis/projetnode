@@ -4,9 +4,24 @@ class SettingsForm extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {localisations : [{"idLocalisation":0, "nameLocalisation":'Choose a localisation'}]}
+    }
+
+    componentDidMount() {
+      fetch('http://localhost:5000/getAllLocalisations')
+      .then(res => res.json())
+      .then(data => {
+        var joined = this.state.localisations.concat(data);
+        this.setState({localisations: joined});console.log(this.state.localisations)});
     }
 
     render() {
+      if(this.state.localisations[0] == null) {
+        return(<div>rien</div>);
+      }
+      else {
+        const localisations = this.state.localisations.map((localisation) => <option value={localisation.idLocalisation}>{localisation.nameLocalisation}</option>)
+
         return(
         <div class="modal fade" id="settingsFormId" tabindex="-1" role="dialog" aria-labelledby="SettingsModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" role="document">
@@ -20,6 +35,14 @@ class SettingsForm extends React.Component {
                 <div class="modal-body">
                   <div class="form-group">
                     <label for="InputPseudo"> Your pseudo : <input type="text" class="form-control form-control-lg" placeholder={this.props.nameUser} readOnly/></label>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="InputEmail"> Your email : <input type="text" class="form-control form-control-lg" placeholder={this.props.emailUser}/></label>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="SelectLocalisation"> Your localisation : <select class="form-control form-control-lg" name="localisations">{localisations}</select></label>
                   </div>
 
                   <div class="form-group">
@@ -45,7 +68,8 @@ class SettingsForm extends React.Component {
             </div>
           </div>
         </div>
-        );
+          );
+      }
     }
 }
 

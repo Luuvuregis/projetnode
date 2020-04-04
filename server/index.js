@@ -69,6 +69,23 @@ else {
     });
   });
 
+  app.get('/getAllLocalisations', function (req, res) {
+    const client = new Client(clientLogins)
+    client.connect();
+    
+    client.query('SELECT * FROM users.localisation;', (err, res1) => {
+      if (err) throw err;
+      var data = [];
+      var cpt = 0;
+      for (let row of res1.rows) {
+        console.log(JSON.stringify(row.nameLocalisation));
+        data.push({"idLocalisation": row.idLocalisation, "nameLocalisation":row.nameLocalisation});
+      }
+      res.send(data)
+      client.end();
+    });
+  })
+
   /**
    * 
    * USER REGISTRATION TO WEBSITE
@@ -79,9 +96,11 @@ else {
     const pwdUser = request.body.user.pwd;
     const confirmPwd = request.body.user.confirmPwd;
     const emailUser = request.body.user.email;
+    const idLocalisation = request.body.user.localisation;
     var data = { message: '', success: false };
     if(pwdUser != confirmPwd) {data.message = "the passwords are differents"; response.send(JSON.stringify(data));}
     else if(pwdUser.trim().length < 8) {data.message = "the password is too short (at least 8 characters)"; response.send(JSON.stringify(data));}
+    else if(idLocalisation == 0) {data.message = "You didn't choose your localisation"; response.send(JSON.stringify(data));}
     else {
       const client = new Client(clientLogins);
       client.connect();
@@ -98,7 +117,7 @@ else {
           client2.connect();
           bcrypt.hash(pwdUser, saltRounds)
           .then(function(hash) {
-            const queryRegister = `INSERT INTO users.users("nameUser", "pwdUser", "emailUser") VALUES ('${nameUser}', '${hash}', '${emailUser}')`;
+            const queryRegister = `INSERT INTO users.users("nameUser", "pwdUser", "emailUser", "idLocalisation") VALUES ('${nameUser}', '${hash}', '${emailUser}', '${idLocalisation}')`;
             client2.query(queryRegister, (err1, res3) => {console.log(err1, res3); client2.end();});
             response.send(JSON.stringify(data));
           });
@@ -116,15 +135,13 @@ else {
    * 
    */
   app.post('/login', function(request, response){
-    const nameUser = request.body.user.name;
+    const loginInfo = request.body.user.name;
     const pwdUser = request.body.user.pwd;
     const client = new Client(clientLogins);
-    const query = `SELECT * FROM users.users where "nameUser" = '${nameUser}'`;
+    const query = `SELECT * FROM users.users where "emailUser" = '${loginInfo}'`;
     client.connect();
     client.query(query, (err, res1) => {
-      var data = {message : 'Password/Pseudo are wrong', success: false, id: '', nameUser: ''};
-      //console.log(res1.rows.length);
-      //console.log(res1.rows[0].pwdUser);
+      var data = {message : 'Password/Pseudo are wrong', success: false, id: '', nameUser: '', emailUser: ''};
       if(res1.rows.length == 1) {
         var hash = res1.rows[0].pwdUser
         bcrypt.compare(pwdUser, hash).then(function(result) {
@@ -134,6 +151,8 @@ else {
             data.message = 'Welcome ! The authentification is a success. You can now close this form.';
             data.idUser = res1.rows[0].idUser;
             data.nameUser = res1.rows[0].nameUser;
+            data.emailUser = res1.rows[0].emailUser;
+            data.idLocalisation = res1.rows[0].idLocalisation;
           }
           response.send(data);
           client.end();
