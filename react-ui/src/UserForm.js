@@ -22,6 +22,8 @@ class UserForm extends React.Component {
       fetch("/register", {method: "POST", headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           user: {
+            name: this.state.name,
+            email: this.state.email,
             pwd: this.state.pwd,
             confirmPwd: this.state.confirmPwd,
           }

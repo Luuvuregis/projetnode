@@ -9,6 +9,7 @@ const saltRounds = 10;
 const isDev = process.env.NODE_ENV !== 'production';
 const PORT = process.env.PORT || 5000;
 const key = '108745517437252';
+var validator = require('email-validator')
 const clientLogins = {
   user: 'ncqgkgyhpwzjpp',
   host: 'ec2-52-207-93-32.compute-1.amazonaws.com',
@@ -92,12 +93,14 @@ else {
    * 
    */
   app.post('/register', function(request, response){
-    const nameUser = request.body.user.name;
+    const nameUser = request.body.user.name.trim();
     const pwdUser = request.body.user.pwd;
     const confirmPwd = request.body.user.confirmPwd;
-    const emailUser = request.body.user.email;
+    const emailUser = request.body.user.email.trim();
     var data = { message: '', success: false };
-    if(pwdUser != confirmPwd) {data.message = "The passwords are differents"; response.send(JSON.stringify(data));}
+    if(validator.validate(emailUser) == false){data.message = "This is not an email"; response.send(JSON.stringify(data));}
+    else if(nameUser.length < 5){data.message = "Your pseudo must have at least 5"; response.send(JSON.stringify(data));}
+    else if(pwdUser != confirmPwd) {data.message = "The passwords are differents"; response.send(JSON.stringify(data));}
     else if(pwdUser.trim().length < 8) {data.message = "The password is too short (at least 8 characters)"; response.send(JSON.stringify(data));}
     else {
       const client = new Client(clientLogins);
@@ -173,6 +176,10 @@ else {
     if(emailUser.length == 0) {
       data.message = 'We didn\'t change your email, Sir';
       data.success = true;
+      response.send(data);
+    }
+    else if(validator.validate(emailUser) == false){
+      data.message = "This is not an email"; 
       response.send(data);
     }
     else {

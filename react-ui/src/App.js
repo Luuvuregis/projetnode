@@ -63,7 +63,7 @@ class App extends React.Component {
   componentDidMount() {
     fetch('http://localhost:5000/')
       .then(res => res.json())
-      .then(data => {this.setState({results: data})});
+      .then(data => {this.setState({results: data});});
   }
 
   render() {
@@ -71,16 +71,16 @@ class App extends React.Component {
       <div>
         <ul class="nav justify-content-center bg-dark">
 
-          <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#">Home <span className="sr-only">(current)</span></a></li>
-          <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#">About</a></li>
-          {this.state.isRegistrable && <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#registrationFormId">Register</a></li>}
-          {this.state.isRegistrable && <li class="nav-item custom-nav"><a className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#LoginFormId">Login</a></li>}
+          <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#">Home <span className="sr-only">(current)</span></button></li>
+          <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#">About</button></li>
+          {this.state.isRegistrable && <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#registrationFormId">Register</button></li>}
+          {this.state.isRegistrable && <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#LoginFormId">Login</button></li>}
          {this.state.isConnected && <li class="nav-item dropdown custom-nav">
-            <a class="nav-link dropdown-toggle customNavLink" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Profile</a>
+            <button class="nav-link dropdown-toggle customNavLink" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false">Profile</button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" href="#"  data-toggle="modal" data-target="#settingsFormId">Settings</a>
+              <button class="dropdown-item" href="#"  data-toggle="modal" data-target="#settingsFormId">Settings</button>
               <div class="dropdown-divider"></div>
-              <a className="nav-item nav-link dropdown-item" onClick={this.handleDisconnect} href="#">Logout</a>
+              <button className="nav-item nav-link dropdown-item" onClick={this.handleDisconnect} href="#">Logout</button>
             </div>
           </li>}
 
