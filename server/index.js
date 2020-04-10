@@ -96,11 +96,9 @@ else {
     const pwdUser = request.body.user.pwd;
     const confirmPwd = request.body.user.confirmPwd;
     const emailUser = request.body.user.email;
-    const idLocalisation = request.body.user.localisation;
     var data = { message: '', success: false };
-    if(pwdUser != confirmPwd) {data.message = "the passwords are differents"; response.send(JSON.stringify(data));}
-    else if(pwdUser.trim().length < 8) {data.message = "the password is too short (at least 8 characters)"; response.send(JSON.stringify(data));}
-    else if(idLocalisation == 0) {data.message = "You didn't choose your localisation"; response.send(JSON.stringify(data));}
+    if(pwdUser != confirmPwd) {data.message = "The passwords are differents"; response.send(JSON.stringify(data));}
+    else if(pwdUser.trim().length < 8) {data.message = "The password is too short (at least 8 characters)"; response.send(JSON.stringify(data));}
     else {
       const client = new Client(clientLogins);
       client.connect();
@@ -117,14 +115,13 @@ else {
           client2.connect();
           bcrypt.hash(pwdUser, saltRounds)
           .then(function(hash) {
-            const queryRegister = `INSERT INTO users.users("nameUser", "pwdUser", "emailUser", "idLocalisation") VALUES ('${nameUser}', '${hash}', '${emailUser}', '${idLocalisation}')`;
+            const queryRegister = `INSERT INTO users.users("nameUser", "pwdUser", "emailUser") VALUES ('${nameUser}', '${hash}', '${emailUser}')`;
             client2.query(queryRegister, (err1, res3) => {console.log(err1, res3); client2.end();});
             response.send(JSON.stringify(data));
           });
         }
         client.end();
       });
-
     }
   });
 
@@ -152,7 +149,6 @@ else {
             data.idUser = res1.rows[0].idUser;
             data.nameUser = res1.rows[0].nameUser;
             data.emailUser = res1.rows[0].emailUser;
-            data.idLocalisation = res1.rows[0].idLocalisation;
           }
           response.send(data);
           client.end();
@@ -163,6 +159,77 @@ else {
         client.end();
       }
     });
+  });
+
+  /**
+   * 
+   * USER UPDATE EMAIL
+   * 
+   */
+  app.put('/changeEmailUser', function(request, response){
+    const emailUser = request.body.user.email.trim();
+    const idUser = request.body.user.id;
+    var data = { message: 'yooo', success: false };
+    if(emailUser.length == 0) {
+      data.message = 'We didn\'t change your email, Sir';
+      data.success = true;
+      response.send(data);
+    }
+    else {
+      const client2 = new Client(clientLogins);
+      client2.connect();
+      const queryCheck = `SELECT * FROM users.users where "emailUser" = '${emailUser}'`;
+      client2.query(queryCheck, (err2, res2) => {
+        if(res2.rows.length > 0) {
+          data.message = "This email is already taken";
+          response.send(data);
+        }
+        else {
+          const client = new Client(clientLogins);
+          client.connect();
+          const query = `UPDATE users.users SET "emailUser" = '${emailUser}' WHERE "idUser" = ${idUser}`;
+          client.query(query, (err1, res1) => {
+            console.log(err1, res1);
+            data.message = 'Changes has been successfully made, Sir';
+            data.success = true;
+            response.send(data);
+            client.end();
+          });
+        }
+        client2.end();
+      });
+    }
+  });
+
+  /**
+   * 
+   * USER UPDATE PASSWORD
+   * 
+   */
+  app.put('/changePasswordUser', function(request, response){
+    const idUser = request.body.user.id;
+    const pwdUser = request.body.user.pwd.trim();
+    const confirmPwd = request.body.user.confirmPwd.trim();
+    var data = { message: '', success: false };
+    if(pwdUser.length == 0 && pwdUser.length == 0) { data.message = 'We didn\'t change your password, Sir'; data.success = true;response.send(data);}
+    else if(pwdUser != confirmPwd) {data.message = "The passwords are differents"; response.send(data);}
+    else if(pwdUser.length < 8) {data.message = "The password is too short (at least 8 characters)"; response.send(data);}
+    else {
+      data.message = 'Changes has been successfully made, Sir';
+      data.success = true;
+      const client = new Client(clientLogins);
+      client.connect();
+      bcrypt.hash(pwdUser, saltRounds)
+      .then(function(hash) {
+        const queryUpdate = `UPDATE users.users SET "pwdUser" = '${hash}' WHERE "idUser" = ${idUser}`;
+        client.query(queryUpdate, (err1, res3) => {
+          console.log(err1, res3); 
+          client.end();
+        });
+        response.send(data);
+      });
+    }
+    response.send(data);
   });
 
   // All remaining requests return the React app, so it can handle routing.
