@@ -49,11 +49,11 @@ class SettingsPasswordForm extends React.Component {
 
                         <form onSubmit={this.handlePasswordSubmit}>
                             <div class="form-group">
-                                <label for="InputPassword"> Gimme your password : <input type="password" class="form-control form-control-lg" value={this.state.pwd} onChange={this.handleSettingsChangePwd} /></label>
+                                <label for="InputPassword"> Votre mot de passe : <input type="password" class="form-control form-control-lg" value={this.state.pwd} onChange={this.handleSettingsChangePwd} /></label>
                             </div>
 
                             <div class="form-group">
-                                <label for="InputPassword2"> Gimme your password again : <input type="password" class="form-control form-control-lg" value={this.state.confirmPwd} onChange={this.handleSettingsChangeConfirm}/></label>
+                                <label for="InputPassword2"> Confirmez votre mot de passe : <input type="password" class="form-control form-control-lg" value={this.state.confirmPwd} onChange={this.handleSettingsChangeConfirm}/></label>
                             </div>
 
                             <div class="form-group">

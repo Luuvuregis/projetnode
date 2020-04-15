@@ -23,7 +23,10 @@ class SettingsEmailForm extends React.Component {
       .then(data => {
         console.log(data);
         this.setState({alertEmailMessage: data.message});
-        if(data.success)  this.setState({alertEmailClass: "alert alert-success"});
+        if(data.success) { 
+          this.setState({alertEmailClass: "alert alert-success"});
+          localStorage.setItem("meailUser", this.state.email);
+        }
         else              this.setState({alertEmailClass: "alert alert-danger"});
       });
       event.preventDefault();

@@ -9,6 +9,7 @@ const saltRounds = 10;
 const isDev = process.env.NODE_ENV !== 'production';
 const PORT = process.env.PORT || 5000;
 const key = '108745517437252';
+var sessionstorage = require('sessionstorage');
 var validator = require('email-validator')
 const clientLogins = {
   user: 'ncqgkgyhpwzjpp',
@@ -55,19 +56,24 @@ else {
 
   // Answer API requests.
   app.get('/', function (req, res) {
-    const client = new Client(clientLogins)
-    client.connect();
-    
-    client.query('SELECT * FROM users.users;', (err, res1) => {
-      if (err) throw err;
-      var data = [];
-      for (let row of res1.rows) {
-        console.log(JSON.stringify(row));
-        data.push(JSON.stringify(row));
-      }
-      res.send(data)
-      client.end();
-    });
+    var data = {connected: false, idUser: '', nameUser: '', emailUser: '',
+    firstnameUser: '', lastnameUser:'', idLocalisation:''};
+    if(sessionstorage.getItem("idUser") != null) {
+      data.connected = true;
+      data.idUser = sessionstorage.getItem("idUser");
+      data.nameUser = sessionstorage.getItem("nameUser");
+      data.emailUser = sessionstorage.getItem("emailUser");
+      data.firstnameUser = sessionstorage.getItem("firstnameUser");
+      data.lastnameUser = sessionstorage.getItem("lastnameUser");
+      data.idLocalisation = sessionstorage.getItem("idLocalisation");
+    }
+    res.send(data);
+  });
+
+  app.get('/disconnect', function (req, res) {
+    var data = {message: 'You have been succesfully disconnected'};
+    sessionstorage.clear();
+    res.send(data)
   });
 
   app.get('/getAllLocalisations', function (req, res) {
@@ -98,27 +104,28 @@ else {
     const confirmPwd = request.body.user.confirmPwd;
     const emailUser = request.body.user.email.trim();
     var data = { message: '', success: false };
-    if(validator.validate(emailUser) == false){data.message = "This is not an email"; response.send(JSON.stringify(data));}
-    else if(nameUser.length < 5){data.message = "Your pseudo must have at least 5"; response.send(JSON.stringify(data));}
-    else if(pwdUser != confirmPwd) {data.message = "The passwords are differents"; response.send(JSON.stringify(data));}
-    else if(pwdUser.trim().length < 8) {data.message = "The password is too short (at least 8 characters)"; response.send(JSON.stringify(data));}
+    if(validator.validate(emailUser) == false){data.message = "Votre email est incorrect."; response.send(JSON.stringify(data));}
+    else if(nameUser.length < 5){data.message = "Votre pseudo est trop court (au moins 5 caractères)."; response.send(JSON.stringify(data));}
+    else if(pwdUser != confirmPwd) {data.message = "Les mots de passe ne concordent pas."; response.send(JSON.stringify(data));}
+    else if(pwdUser.trim().length < 8) {data.message = "Votre mot de passe est trop court (au moins 8 caractères)."; response.send(JSON.stringify(data));}
     else {
       const client = new Client(clientLogins);
       client.connect();
       const queryCheck = `SELECT * FROM users.users where "nameUser" = '${nameUser}' OR "emailUser" = '${emailUser}'`;
       client.query(queryCheck, (err, res2) => {
         if(res2.rows.length > 0) {
-          data.message = res2.rows[0].nameUser == nameUser ? "This pseudo already exists" : "This email already exists";
+          data.message = res2.rows[0].nameUser == nameUser ? "Ce pseudo est déjà pris." : "Cet email est déjà pris.";
           response.send(JSON.stringify(data));
         }
         else {
-          data.message = "The registration is truly a success. You can now login to the website.";
+          data.message = "L'inscription est un succès. Vous pouvez dès à présent vous connecter.";
           data.success = true;
           const client2 = new Client(clientLogins);
           client2.connect();
           bcrypt.hash(pwdUser, saltRounds)
           .then(function(hash) {
-            const queryRegister = `INSERT INTO users.users("nameUser", "pwdUser", "emailUser") VALUES ('${nameUser}', '${hash}', '${emailUser}')`;
+            const queryRegister = `INSERT INTO users.users("nameUser", "pwdUser", "emailUser", "firstnameUser", "lastnameUser", "idLocalisation") 
+                                    VALUES ('${nameUser}', '${hash}', '${emailUser}', '', '', 0)`;
             client2.query(queryRegister, (err1, res3) => {console.log(err1, res3); client2.end();});
             response.send(JSON.stringify(data));
           });
@@ -141,7 +148,8 @@ else {
     const query = `SELECT * FROM users.users where "emailUser" = '${loginInfo}'`;
     client.connect();
     client.query(query, (err, res1) => {
-      var data = {message : 'Password/Pseudo are wrong', success: false, id: '', nameUser: '', emailUser: ''};
+      var data = {message : 'Password/Pseudo are wrong', success: false, idUser: '', nameUser: '', emailUser: '',
+        firstnameUser: '', lastnameUser:'', idLocalisation:''};
       if(res1.rows.length == 1) {
         var hash = res1.rows[0].pwdUser
         bcrypt.compare(pwdUser, hash).then(function(result) {
@@ -152,6 +160,17 @@ else {
             data.idUser = res1.rows[0].idUser;
             data.nameUser = res1.rows[0].nameUser;
             data.emailUser = res1.rows[0].emailUser;
+            data.firstnameUser = res1.rows[0].firstnameUser;
+            data.lastnameUser = res1.rows[0].lastnameUser;
+            data.idLocalisation = res1.rows[0].idLocalisation;
+            
+            sessionstorage.setItem("idUser", data.idUser);
+            sessionstorage.setItem("nameUser", data.nameUser);
+            sessionstorage.setItem("emailUser", data.emailUser);
+            sessionstorage.setItem("firstnameUser", data.firstnameUser);
+            sessionstorage.setItem("lastnameUser", data.lastnameUser);
+            sessionstorage.setItem("idLocalisation", data.idLocalisation);
+            sessionstorage.setItem("connected", true);
           }
           response.send(data);
           client.end();
@@ -172,14 +191,14 @@ else {
   app.put('/changeEmailUser', function(request, response){
     const emailUser = request.body.user.email.trim();
     const idUser = request.body.user.id;
-    var data = { message: 'yooo', success: false };
+    var data = { message: '', success: false };
     if(emailUser.length == 0) {
-      data.message = 'We didn\'t change your email, Sir';
+      data.message = 'Aucun changement n\'a été effectué.';
       data.success = true;
       response.send(data);
     }
     else if(validator.validate(emailUser) == false){
-      data.message = "This is not an email"; 
+      data.message = "Votre email est incorrect"; 
       response.send(data);
     }
     else {
@@ -188,7 +207,7 @@ else {
       const queryCheck = `SELECT * FROM users.users where "emailUser" = '${emailUser}'`;
       client2.query(queryCheck, (err2, res2) => {
         if(res2.rows.length > 0) {
-          data.message = "This email is already taken";
+          data.message = "Cet email est déjà pris.";
           response.send(data);
         }
         else {
@@ -197,7 +216,7 @@ else {
           const query = `UPDATE users.users SET "emailUser" = '${emailUser}' WHERE "idUser" = ${idUser}`;
           client.query(query, (err1, res1) => {
             console.log(err1, res1);
-            data.message = 'Changes has been successfully made, Sir';
+            data.message = 'Les changements ont été effectués avec succès.';
             data.success = true;
             response.send(data);
             client.end();
@@ -218,11 +237,11 @@ else {
     const pwdUser = request.body.user.pwd.trim();
     const confirmPwd = request.body.user.confirmPwd.trim();
     var data = { message: '', success: false };
-    if(pwdUser.length == 0 && pwdUser.length == 0) { data.message = 'We didn\'t change your password, Sir'; data.success = true;response.send(data);}
-    else if(pwdUser != confirmPwd) {data.message = "The passwords are differents"; response.send(data);}
-    else if(pwdUser.length < 8) {data.message = "The password is too short (at least 8 characters)"; response.send(data);}
+    if(pwdUser.length == 0 && pwdUser.length == 0) { data.message = 'Aucun changement n\'a été effectué.'; data.success = true;response.send(data);}
+    else if(pwdUser != confirmPwd) {data.message = "Les mots de passe sont différents."; response.send(data);}
+    else if(pwdUser.length < 8) {data.message = "Le mot de passe est trop courts (au moins 8 caractères)."; response.send(data);}
     else {
-      data.message = 'Changes has been successfully made, Sir';
+      data.message = 'Les changements ont été effectués avec succès.';
       data.success = true;
       const client = new Client(clientLogins);
       client.connect();
@@ -237,6 +256,48 @@ else {
       });
     }
     response.send(data);
+  });
+
+  /**
+   * 
+   * UPDATE FIRSTNAME, LASTNAME AND LOCALISATION OF A USER
+   * 
+   */
+  app.put('/updateIdentity', function(request, response){
+    const idUser = request.body.identity.idUser;
+    const firstnameUser = request.body.identity.firstnameUser.trim();
+    const lastnameUser = request.body.identity.lastnameUser.trim();
+    const idLocalisation = request.body.identity.idLocalisation;
+    console.log(idUser);
+    var data = { message: '', success: false };
+    var digitsRegex = /\d+/;
+    if(firstnameUser.match(digitsRegex) != null || lastnameUser.match(digitsRegex) != null) {
+      data.message = "Pas de chiffres dans votre nom/prenom.";
+      response.send(data);
+    }
+    else if(idLocalisation == 0) {
+      data.message = "Veuillez choisir votre localisation.";
+      response.send(data);
+    }
+    else {
+      var firstnameParams = firstnameUser.length == 0 ? '' : `"firstnameUser" = '${firstnameUser}',`;
+      var laststnameParams = lastnameUser.length == 0 ? '' : `"lastnameUser" = '${lastnameUser}',`;
+      var idLocalisationParams = `"idLocalisation" = ${idLocalisation}`;
+      const query = `UPDATE users.users SET ${firstnameParams} ${laststnameParams} ${idLocalisationParams} WHERE "idUser" = ${idUser}`;
+      console.log(query);
+      const client = new Client(clientLogins);
+      client.connect();
+      client.query(query, (err1, res1) => {
+        console.log(err1, res1);
+        data.message = 'Les changements ont été effectués avec succès.';
+        data.success = true;
+        sessionstorage.setItem("firstnameUser", firstnameUser);
+        sessionstorage.setItem("lastnameUser", lastnameUser);
+        sessionstorage.setItem("idLocalisation", idLocalisation);
+        response.send(data);
+        client.end();
+      });
+    }
   });
 
   // All remaining requests return the React app, so it can handle routing.

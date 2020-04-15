@@ -61,19 +61,19 @@ class UserForm extends React.Component {
 
                 <div class="modal-body">
                   <div class="form-group">
-                    <label for="InputEmail"> What's your email : <input type="text" class="form-control form-control-lg" value={this.state.email} onChange={this.handleRegisterChangeEmail} /></label>
+                    <label for="InputEmail"> Votre email : <input type="text" class="form-control form-control-lg" value={this.state.email} onChange={this.handleRegisterChangeEmail} /></label>
                   </div>
 
                   <div class="form-group">
-                    <label for="InputPseudo"> What's your pseudo : <input type="text" class="form-control form-control-lg" value={this.state.name} onChange={this.handleRegisterChangeName}/></label>
+                    <label for="InputPseudo"> Votre pseudo : <input type="text" class="form-control form-control-lg" value={this.state.name} onChange={this.handleRegisterChangeName}/></label>
                   </div>
 
                   <div class="form-group">
-                    <label for="InputPassword"> Gimme your password : <input type="password" class="form-control form-control-lg" value={this.state.pwd} onChange={this.handleRegisterChangePwd} /></label>
+                    <label for="InputPassword"> Votre mot de passe : <input type="password" class="form-control form-control-lg" value={this.state.pwd} onChange={this.handleRegisterChangePwd} /></label>
                   </div>
 
                   <div class="form-group">
-                    <label for="InputPassword2"> Gimme your password again : <input type="password" class="form-control form-control-lg" value={this.state.confirmPwd} onChange={this.handleChangeConfirm}/></label>
+                    <label for="InputPassword2"> Confirmez votre mot de passe : <input type="password" class="form-control form-control-lg" value={this.state.confirmPwd} onChange={this.handleChangeConfirm}/></label>
                   </div>
                 </div>
 
@@ -83,7 +83,7 @@ class UserForm extends React.Component {
                   </div>
                   <br/>
                   <div class="form-group">
-                    <input type="submit" class="btn btn-primary" value="Submit" />
+                    <input type="submit" class="btn btn-primary" value="Enregistrer" />
                   </div>
                 </div>
 
