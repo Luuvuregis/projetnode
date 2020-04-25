@@ -102,7 +102,7 @@ class IdentityForm extends React.Component {
                         <br/>
 
                         <div class="form-group">
-                            <input type="submit" class="btn btn-primary" value="Submit" />
+                            <input type="submit" class="btn btn-primary" value="Enregistrer" />
                         </div>
                     </form>
                   </div>

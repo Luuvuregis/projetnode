@@ -25,7 +25,7 @@ class SettingsEmailForm extends React.Component {
         this.setState({alertEmailMessage: data.message});
         if(data.success) { 
           this.setState({alertEmailClass: "alert alert-success"});
-          localStorage.setItem("meailUser", this.state.email);
+          localStorage.setItem("emailUser", this.state.email);
         }
         else              this.setState({alertEmailClass: "alert alert-danger"});
       });
@@ -59,7 +59,7 @@ class SettingsEmailForm extends React.Component {
                     </div>
 
                     <div class="form-group">
-                        <input type="submit" class="btn btn-primary" value="Submit" />
+                        <input type="submit" class="btn btn-primary" value="Enregistrer" />
                     </div>
                 </form>
               </div>

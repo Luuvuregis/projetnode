@@ -8,7 +8,6 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const isDev = process.env.NODE_ENV !== 'production';
 const PORT = process.env.PORT || 5000;
-const key = '108745517437252';
 var sessionstorage = require('sessionstorage');
 var validator = require('email-validator')
 const clientLogins = {
@@ -36,7 +35,6 @@ if (!isDev && cluster.isMaster) {
 } 
 else {
   const app = express();
-  const heroTab = []
 
   // Parse URL-encoded bodies (as sent by HTML forms)
   app.use(express.urlencoded({ extended: true }));
@@ -57,7 +55,7 @@ else {
   // Answer API requests.
   app.get('/', function (req, res) {
     var data = {connected: false, idUser: '', nameUser: '', emailUser: '',
-    firstnameUser: '', lastnameUser:'', idLocalisation:''};
+    firstnameUser: '', lastnameUser:'', idLocalisation:'', isAdmin: ''};
     if(sessionstorage.getItem("idUser") != null) {
       data.connected = true;
       data.idUser = sessionstorage.getItem("idUser");
@@ -66,6 +64,7 @@ else {
       data.firstnameUser = sessionstorage.getItem("firstnameUser");
       data.lastnameUser = sessionstorage.getItem("lastnameUser");
       data.idLocalisation = sessionstorage.getItem("idLocalisation");
+      data.isAdmin = sessionstorage.getItem("isAdmin");
     }
     res.send(data);
   });
@@ -124,8 +123,8 @@ else {
           client2.connect();
           bcrypt.hash(pwdUser, saltRounds)
           .then(function(hash) {
-            const queryRegister = `INSERT INTO users.users("nameUser", "pwdUser", "emailUser", "firstnameUser", "lastnameUser", "idLocalisation") 
-                                    VALUES ('${nameUser}', '${hash}', '${emailUser}', '', '', 0)`;
+            const queryRegister = `INSERT INTO users.users("nameUser", "pwdUser", "emailUser", "firstnameUser", "lastnameUser", "idLocalisation", "isAdmin") 
+                                    VALUES ('${nameUser}', '${hash}', '${emailUser}', '', '', 0, FALSE)`;
             client2.query(queryRegister, (err1, res3) => {console.log(err1, res3); client2.end();});
             response.send(JSON.stringify(data));
           });
@@ -149,7 +148,7 @@ else {
     client.connect();
     client.query(query, (err, res1) => {
       var data = {message : 'Password/Pseudo are wrong', success: false, idUser: '', nameUser: '', emailUser: '',
-        firstnameUser: '', lastnameUser:'', idLocalisation:''};
+        firstnameUser: '', lastnameUser:'', idLocalisation:'', isAdmin: ''};
       if(res1.rows.length == 1) {
         var hash = res1.rows[0].pwdUser
         bcrypt.compare(pwdUser, hash).then(function(result) {
@@ -163,13 +162,15 @@ else {
             data.firstnameUser = res1.rows[0].firstnameUser;
             data.lastnameUser = res1.rows[0].lastnameUser;
             data.idLocalisation = res1.rows[0].idLocalisation;
-            
+            data.isAdmin = res1.rows[0].isAdmin;
+            console.log(data.isAdmin);
             sessionstorage.setItem("idUser", data.idUser);
             sessionstorage.setItem("nameUser", data.nameUser);
             sessionstorage.setItem("emailUser", data.emailUser);
             sessionstorage.setItem("firstnameUser", data.firstnameUser);
             sessionstorage.setItem("lastnameUser", data.lastnameUser);
             sessionstorage.setItem("idLocalisation", data.idLocalisation);
+            sessionstorage.setItem("isAdmin", data.isAdmin);
             sessionstorage.setItem("connected", true);
           }
           response.send(data);
@@ -298,6 +299,66 @@ else {
         client.end();
       });
     }
+  });
+
+  app.post('/addElection', function(request, response){
+    const nomElection = request.body.election.nomElection.trim();
+    const dateElection = request.body.election.dateElection.trim();
+    const idLocalisation = request.body.election.idLocalisation;
+    const tourElection = request.body.election.tourElection;
+    console.log(dateElection);
+    var data = { message: '', success: false };
+    if(nomElection.length == 0) {
+      data.message = "Veuillez indiquer le nom de l'élection."
+      response.send(data);
+    }
+    else {
+      const client = new Client(clientLogins);
+      client.connect();
+      const query = `INSERT INTO users.elections("nomElection", "dateElection", "idLocalisation", "tourElection") VALUES ('${nomElection}', '${dateElection}', ${idLocalisation}, ${tourElection})`;
+      console.log(query);
+      client.query(query, (err1, res1) => {
+        console.log(err1, res1);
+        data.message = "L'élection a été ajoutée avec succès.";
+        data.success = true;
+        response.send(data);
+        client.end();
+      });
+    }
+  });
+
+  app.post('/addVision', function(request,response){
+    const nomVision = request.body.vision.nomVision.trim();
+    var data = { message: '', success: false };
+    if(nomVision.length == 0) {
+      data.message = "Veuillez insérer le nom de la vision politique souhaitée";
+    }
+    else {
+      const client = new Client(clientLogins);
+      client.connect();
+      const query = `INSERT INTO users.vision("nomVision") VALUES ('${nomVision}')`;
+      console.log(query);
+      client.query(query, (err1, res1) => {
+        console.log(err1, res1);
+        data.message = "La vision politique a été ajoutée avec succès.";
+        data.success = true;
+        response.send(data);
+        client.end();
+      });
+    }
+  });
+
+  app.get('/getAllElections', function(request, response){
+    const client = new Client(clientLogins)
+    client.connect();
+    
+    client.query('SELECT * FROM users.elections e, users.localisation l WHERE e."idLocalisation" = l."idLocalisation"', (err, res1) => {
+      if (err) throw err;
+      var data = res1.rows;
+      console.log(data);
+      response.send(data)
+      client.end();
+    });
   });
 
   // All remaining requests return the React app, so it can handle routing.

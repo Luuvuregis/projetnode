@@ -2,6 +2,9 @@ import React from 'react';
 import UserForm from './UserForm';
 import SettingsForm from './SettingsForm';
 import IdentityForm from './IdentityForm';
+import ElectionsForm from './ElectionsForm';
+import VisionForm from './VisionForm';
+import ElectionsList from './ElectionsList';
 import './App.css';
 
 class App extends React.Component {
@@ -44,9 +47,10 @@ class App extends React.Component {
           localStorage.setItem("firstnameUser", data.firstnameUser);
           localStorage.setItem("lastnameUser", data.lastnameUser);
           localStorage.setItem("idLocalisation", data.idLocalisation);
+          localStorage.setItem("isAdmin", data.isAdmin);
           var welcomeMessage = "Bonjour " + localStorage.getItem("firstnameUser") + ' ' + localStorage.getItem("lastnameUser").charAt(0) + ".";
           localStorage.setItem("welcomeMessage", welcomeMessage);
-          document.location.reload(true);
+          //document.location.reload(true);
         }
         this.setState({alertMessage: data.message})
     });
@@ -78,6 +82,7 @@ class App extends React.Component {
           localStorage.setItem("firstnameUser", data.firstnameUser);
           localStorage.setItem("lastnameUser", data.lastnameUser);
           localStorage.setItem("idLocalisation", data.idLocalisation);
+          localStorage.setItem("isAdmin", data.isAdmin);
           console.log(data);
           var welcomeMessage = "Bonjour " + localStorage.getItem("firstnameUser") + ' ' + localStorage.getItem("lastnameUser").charAt(0) + ".";
           localStorage.setItem("welcomeMessage", welcomeMessage);
@@ -111,6 +116,16 @@ class App extends React.Component {
               <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#">Informations</button></li>
               {localStorage.getItem("idUser") == null && <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#registrationFormId">S'enregistrer</button></li>}
               {localStorage.getItem("idUser") == null && <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#LoginFormId">Se connecter</button></li>}
+              {localStorage.getItem("isAdmin") == 1 && 
+                <li class="nav-item dropdown custom-nav">
+                  <button class="nav-link dropdown-toggle customNavLink" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false">Administration</button>
+                  <div class="dropdown-menu">
+                    <button className="dropdown-item" href="#" data-toggle="modal" data-target="#electionFormId">Ajouter une élection</button>
+                    <button className="dropdown-item" href="#" data-toggle="modal" data-target="#visionFormId">Ajouter une vision politique</button>
+                    <div class="dropdown-divider"></div>
+                    <button className="dropdown-item" href="#" data-toggle="modal" data-target="#electionListId">Liste des élections</button>
+                  </div>
+                </li>}
               {localStorage.getItem("idUser") != null && 
                 <li class="nav-item dropdown custom-nav">
                   <button class="nav-link dropdown-toggle customNavLink" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false">Mon profil</button>
@@ -134,8 +149,14 @@ class App extends React.Component {
 
         <UserForm nameForm='Inscription' modalId='registrationFormId'/>
 
-        <SettingsForm nameForm='Settings' modalId='settingsFormId' nameUser={localStorage.getItem("nameUser")} 
+        <SettingsForm nameForm='Paramètres' modalId='settingsFormId' nameUser={localStorage.getItem("nameUser")} 
             emailUser={localStorage.getItem("emailUser")} idUser={localStorage.getItem("idUser")}/>
+
+        <ElectionsForm nameForm='Ajouter une élection' modalId='electionFormId' idUser={localStorage.getItem("idUser")}/>
+
+        <ElectionsList nameForm='Liste des prochaines élections' modalId='electionListId' idUser={localStorage.getItem("idUser")}/>
+
+        <VisionForm nameForm='Ajouter une vision politique' modalId='visionFormId' idUser={localStorage.getItem("idUser")}/>
         
         <div class="modal fade" show={this.state.showModal} id="LoginFormId" tabindex="-1" role="dialog" aria-labelledby="LoginModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" role="document">
