@@ -32,7 +32,6 @@ class VisionItem extends React.Component {
     render() {
         return(
             <li>
-                {this.props.idVision} - 
                 {this.props.nomVision} - 
 
                 <button type="button" class="modifyIcon" onClick={this.handleDeleteLine}>

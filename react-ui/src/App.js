@@ -4,6 +4,7 @@ import SettingsForm from './SettingsForm';
 import IdentityForm from './IdentityForm';
 import ElectionsForm from './ElectionsForm';
 import VisionForm from './VisionForm';
+import MaVisionForm from './MaVisionForm';
 import ElectionsList from './ElectionsList';
 import VisionsList from './VisionsList';
 import './App.css';
@@ -49,6 +50,8 @@ class App extends React.Component {
           localStorage.setItem("lastnameUser", data.lastnameUser);
           localStorage.setItem("idLocalisation", data.idLocalisation);
           localStorage.setItem("isAdmin", data.isAdmin);
+          localStorage.setItem("idVision1", data.idVision1);          
+          localStorage.setItem("idVision2", data.idVision2);
           var welcomeMessage = "Bonjour " + localStorage.getItem("firstnameUser") + ' ' + localStorage.getItem("lastnameUser").charAt(0) + ".";
           localStorage.setItem("welcomeMessage", welcomeMessage);
           //document.location.reload(true);
@@ -84,6 +87,8 @@ class App extends React.Component {
           localStorage.setItem("lastnameUser", data.lastnameUser);
           localStorage.setItem("idLocalisation", data.idLocalisation);
           localStorage.setItem("isAdmin", data.isAdmin);
+          localStorage.setItem("idVision1", data.idVision1);          
+          localStorage.setItem("idVision2", data.idVision2);
           console.log(data);
           var welcomeMessage = "Bonjour " + localStorage.getItem("firstnameUser") + ' ' + localStorage.getItem("lastnameUser").charAt(0) + ".";
           localStorage.setItem("welcomeMessage", welcomeMessage);
@@ -133,6 +138,7 @@ class App extends React.Component {
                   <button class="nav-link dropdown-toggle customNavLink" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false">Mon profil</button>
                   <div class="dropdown-menu">
                     <button class="dropdown-item" href="#"  data-toggle="modal" data-target="#identityFormId">Ma carte d'identité</button>
+                    <button class="dropdown-item" href="#"  data-toggle="modal" data-target="#maVisionFormId">Ma vision politique</button>
                     <button class="dropdown-item" href="#"  data-toggle="modal" data-target="#settingsFormId">Paramètres</button>
                     <div class="dropdown-divider"></div>
                     <button className="nav-item nav-link dropdown-item" onClick={this.handleDisconnect} href="#">Se déconnecter</button>
@@ -160,6 +166,9 @@ class App extends React.Component {
         <VisionsList nameForm='Liste des visions politiques disponibles' modalId='visionsListId' idUser={localStorage.getItem("idUser")}/>
 
         <VisionForm nameForm='Ajouter une vision politique' modalId='visionFormId' idUser={localStorage.getItem("idUser")} method={"POST"}/>
+
+        
+        <MaVisionForm nameForm='Ma vision politique' modalId='maVisionFormId' idUser={localStorage.getItem("idUser")}/>
         
         <div class="modal fade" show={this.state.showModal} id="LoginFormId" tabindex="-1" role="dialog" aria-labelledby="LoginModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" role="document">

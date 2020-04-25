@@ -55,7 +55,7 @@ else {
   // Answer API requests.
   app.get('/', function (req, res) {
     var data = {connected: false, idUser: '', nameUser: '', emailUser: '',
-    firstnameUser: '', lastnameUser:'', idLocalisation:'', isAdmin: ''};
+    firstnameUser: '', lastnameUser:'', idLocalisation:'', isAdmin: '', idVision1: 0, idVision2: 0};
     if(sessionstorage.getItem("idUser") != null) {
       data.connected = true;
       data.idUser = sessionstorage.getItem("idUser");
@@ -65,6 +65,8 @@ else {
       data.lastnameUser = sessionstorage.getItem("lastnameUser");
       data.idLocalisation = sessionstorage.getItem("idLocalisation");
       data.isAdmin = sessionstorage.getItem("isAdmin");
+      data.idVision1 = sessionstorage.getItem("idVision1");
+      data.idVision2 = sessionstorage.getItem("idVision2");
     }
     res.send(data);
   });
@@ -123,8 +125,8 @@ else {
           client2.connect();
           bcrypt.hash(pwdUser, saltRounds)
           .then(function(hash) {
-            const queryRegister = `INSERT INTO users.users("nameUser", "pwdUser", "emailUser", "firstnameUser", "lastnameUser", "idLocalisation", "isAdmin") 
-                                    VALUES ('${nameUser}', '${hash}', '${emailUser}', '', '', 0, FALSE)`;
+            const queryRegister = `INSERT INTO users.users("nameUser", "pwdUser", "emailUser", "firstnameUser", "lastnameUser", "idLocalisation", "isAdmin", "idVision1", "idVision2") 
+                                    VALUES ('${nameUser}', '${hash}', '${emailUser}', '', '', 0, 0, 0, 0)`;
             client2.query(queryRegister, (err1, res3) => {console.log(err1, res3); client2.end();});
             response.send(JSON.stringify(data));
           });
@@ -171,6 +173,8 @@ else {
             sessionstorage.setItem("lastnameUser", data.lastnameUser);
             sessionstorage.setItem("idLocalisation", data.idLocalisation);
             sessionstorage.setItem("isAdmin", data.isAdmin);
+            sessionstorage.setItem("idVision1", data.idVision1);
+            sessionstorage.setItem("idVision2", data.idVision2);
             sessionstorage.setItem("connected", true);
           }
           response.send(data);
@@ -352,8 +356,8 @@ else {
   app.get('/getAllElections', function(request, response){
     const client = new Client(clientLogins)
     client.connect();
-    
-    client.query('SELECT * FROM users.elections e, users.localisation l WHERE e."idLocalisation" = l."idLocalisation"', (err, res1) => {
+    const query = 'SELECT * FROM users.elections e, users.localisation l WHERE e."idLocalisation" = l."idLocalisation" AND e."dateElection" > NOW()'
+    client.query(query, (err, res1) => {
       if (err) throw err;
       var data = res1.rows;
       console.log(data);
@@ -403,7 +407,7 @@ else {
     const client = new Client(clientLogins)
     client.connect();
     
-    client.query('SELECT * FROM users.vision', (err, res1) => {
+    client.query('SELECT * FROM users.vision ORDER BY "idVision"', (err, res1) => {
       if (err) throw err;
       var data = res1.rows;
       console.log(data);
@@ -444,6 +448,31 @@ else {
       client.query(query, (err1, res1) => {
         console.log(err1, res1);
         data.message = "La vision politique a été modifiée avec succès.";
+        data.success = true;
+        response.send(data);
+        client.end();
+      });
+    }
+  });
+
+  app.post('/updateVisionUser', function(request, response){
+    var idUser = request.body.vision.idUser
+    var idVision1 = request.body.vision.idVision1;
+    var idVision2 = request.body.vision.idVision2;
+    var data = { message: '', success: false };
+    if(idVision1 == idVision2) {
+      data.message = "Veuillez choisir deux visions différentes."
+      response.send(data);
+    }
+    else {
+      console.log(request.body.vision);
+      const client = new Client(clientLogins);
+      client.connect();
+      const query = `UPDATE users.users SET "idVision1" = '${idVision1}', "idVision2" = '${idVision2}'  WHERE "idUser" = ${idUser}`;
+      console.log(query);
+      client.query(query, (err1, res1) => {
+        console.log(err1, res1);
+        data.message = "Les changements ont été appliqués.";
         data.success = true;
         response.send(data);
         client.end();
