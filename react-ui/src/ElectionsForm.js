@@ -49,27 +49,47 @@ class ElectionsForm extends React.Component {
 
     handleSubmit(event) {
         var dateFormat = this.formatDate(this.state.startDate);
-        fetch('/addElection', {method: "POST", headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
+        var localBody; var serverLink;
+        if(this.props.method == "POST") {
+            alert("POST")
+            serverLink = '/addElection';
+            localBody = JSON.stringify({
                 election: {
                     nomElection: this.state.nameElection,
                     tourElection: this.state.tourElection,
                     idLocalisation: this.state.idLocalisation,
                     dateElection: dateFormat
                 }
-            })
+            });
+        }
+        else {
+            alert("PUT");
+            serverLink = '/updateElection';
+            localBody = JSON.stringify({
+                election: {
+                    idElection: this.props.idElection,
+                    nomElection: this.state.nameElection,
+                    tourElection: this.state.tourElection,
+                    idLocalisation: this.state.idLocalisation,
+                    dateElection: dateFormat
+                }
+            });
+        }
+
+        fetch(serverLink, {method: this.props.method, headers: {'Content-Type': 'application/json'},
+            body: localBody
         })
         .then(res => res.json())
         .then(data => {
-          console.log(data);
-          if(data.success){
+        console.log(data);
+        if(data.success){
             this.setState({alertElectionClass: "alert alert-success"});
-          }
-          else {
+        }
+        else {
             this.setState({alertElectionClass: "alert alert-danger"});
-          }
+        }
 
-          this.setState({alertElectionMessage: data.message});
+        this.setState({alertElectionMessage: data.message});
         });
         event.preventDefault();
     }
@@ -98,7 +118,7 @@ class ElectionsForm extends React.Component {
         
 
         return(
-            <div class="modal fade" id={this.props.modalId} tabindex="-1" role="dialog" aria-labelledby="ElectionsModalCenterTitle" aria-hidden="true">
+            <div class="modal fade" id={this.props.modalId} tabindex="1" role="dialog" aria-labelledby="ElectionsModalCenterTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
               <div class="modal-content">
                   <div class="modal-header">

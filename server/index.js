@@ -332,6 +332,7 @@ else {
     var data = { message: '', success: false };
     if(nomVision.length == 0) {
       data.message = "Veuillez insérer le nom de la vision politique souhaitée";
+      response.send(data);
     }
     else {
       const client = new Client(clientLogins);
@@ -360,6 +361,96 @@ else {
       client.end();
     });
   });
+
+  app.delete('/deleteElection', function(request, response){
+    var idElection = request.body.election.idElection;
+    console.log(idElection);
+    var data = { message: '', success: false };
+    const client = new Client(clientLogins)
+    client.connect();
+    client.query(`DELETE FROM users.elections WHERE "idElection" =  ${idElection}`, (err, res1) => {
+      if (err) throw err;
+      data.message = "L'election a été effacée avec succès";
+      data.success = true;
+      response.send(data)
+      client.end();
+    });
+  });
+
+  app.put('/updateElection', function(request, response){
+    var idElection = request.body.election.idElection;
+    var nomElection = request.body.election.nomElection;
+    var tourElection = request.body.election.tourElection;
+    var idLocalisation = request.body.election.idLocalisation;
+    var dateElection = request.body.election.dateElection;
+
+    var data = { message: '', success: false };
+    const client = new Client(clientLogins)
+    client.connect();
+    data.success = true;
+    data.message = "Les changements ont été effectués avec succès";
+    const query = `UPDATE users.elections
+      SET "nomElection"='${nomElection}', "dateElection"='${dateElection}', "idLocalisation"=${idLocalisation}, "tourElection"=${tourElection}
+      WHERE "idElection" = ${idElection}`;
+    client.query(query, (err, res1) => {
+      if (err) throw err;
+      response.send(data)
+      client.end();
+    });
+  });
+
+  app.get('/getAllVisions', function(request, response){
+    const client = new Client(clientLogins)
+    client.connect();
+    
+    client.query('SELECT * FROM users.vision', (err, res1) => {
+      if (err) throw err;
+      var data = res1.rows;
+      console.log(data);
+      response.send(data)
+      client.end();
+    });
+  });
+
+  app.delete('/deleteVision', function(request, response){
+    var idVision = request.body.vision.idVision;
+    console.log(idVision);
+    var data = { message: '', success: false };
+    const client = new Client(clientLogins)
+    client.connect();
+    client.query(`DELETE FROM users.vision WHERE "idVision" =  ${idVision}`, (err, res1) => {
+      if (err) throw err;
+      data.message = "La vision politique a été effacée avec succès";
+      data.success = true;
+      response.send(data)
+      client.end();
+    });
+  });
+
+  app.put('/updateVision', function(request, response){
+    var idVision = request.body.vision.idVision;
+    var nomVision = request.body.vision.nomVision;
+    console.log(request.body.vision);
+    var data = { message: '', success: false };
+    if(nomVision.length == 0) {
+      data.message = "Veuillez indiquez le nom de la vision politique souhaitée";
+      response.send(data);
+    }
+    else {
+      const client = new Client(clientLogins);
+      client.connect();
+      const query = `UPDATE users.vision SET "nomVision" = '${nomVision}' WHERE "idVision" = ${idVision}`;
+      console.log(query);
+      client.query(query, (err1, res1) => {
+        console.log(err1, res1);
+        data.message = "La vision politique a été modifiée avec succès.";
+        data.success = true;
+        response.send(data);
+        client.end();
+      });
+    }
+  });
+
 
   // All remaining requests return the React app, so it can handle routing.
   app.get('*', function(request, response) {

@@ -14,26 +14,51 @@ class VisionForm extends React.Component {
 
 
     handleSubmit(event) {
-        fetch('/addVision', {method: "POST", headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                vision: {
-                    nomVision: this.state.nameVision
-                }
+        if(this.props.method == "POST") {
+            fetch('/addVision', {method: "POST", headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    vision: {
+                        nomVision: this.state.nameVision
+                    }
+                })
             })
-        })
-        .then(res => res.json())
-        .then(data => {
-          console.log(data);
-          if(data.success){
-            this.setState({alertVisionClass: "alert alert-success"});
-          }
-          else {
-            this.setState({alertVisionClass: "alert alert-danger"});
-          }
+            .then(res => res.json())
+            .then(data => {
+            console.log(data);
+                if(data.success){
+                    this.setState({alertVisionClass: "alert alert-success"});
+                }
+                else {
+                    this.setState({alertVisionClass: "alert alert-danger"});
+                }
 
-          this.setState({alertVisionMessage: data.message});
-        });
-        event.preventDefault();
+                this.setState({alertVisionMessage: data.message});
+            });
+            event.preventDefault();
+        }
+        else {
+            fetch('/updateVision', {method: "PUT", headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    vision: {
+                        idVision: this.props.idVision,
+                        nomVision: this.state.nameVision
+                    }
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                if(data.success){
+                    this.setState({alertVisionClass: "alert alert-success"});
+                }
+                else {
+                    this.setState({alertVisionClass: "alert alert-danger"});
+                }
+
+                this.setState({alertVisionMessage: data.message});
+            });
+            event.preventDefault();
+        }
     }
 
     render() {        
@@ -50,7 +75,7 @@ class VisionForm extends React.Component {
                     <form onSubmit={this.handleSubmit}>
 
                         <div class="form-group">
-                            <label for="InputVisio"> Nom de la vision politique : <input type="text" class="form-control form-control-lg" value={this.state.nameVision} onChange={this.handleChangeNameVision}/></label>
+                            <label for="InputVision"> Nom de la vision politique : <input type="text" class="form-control form-control-lg" value={this.state.nameVision} onChange={this.handleChangeNameVision}/></label>
                         </div>
 
                         <div class="form-group">

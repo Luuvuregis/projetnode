@@ -5,6 +5,7 @@ import IdentityForm from './IdentityForm';
 import ElectionsForm from './ElectionsForm';
 import VisionForm from './VisionForm';
 import ElectionsList from './ElectionsList';
+import VisionsList from './VisionsList';
 import './App.css';
 
 class App extends React.Component {
@@ -124,6 +125,7 @@ class App extends React.Component {
                     <button className="dropdown-item" href="#" data-toggle="modal" data-target="#visionFormId">Ajouter une vision politique</button>
                     <div class="dropdown-divider"></div>
                     <button className="dropdown-item" href="#" data-toggle="modal" data-target="#electionListId">Liste des élections</button>
+                    <button className="dropdown-item" href="#" data-toggle="modal" data-target="#visionsListId">Liste des visions politiques</button>
                   </div>
                 </li>}
               {localStorage.getItem("idUser") != null && 
@@ -152,11 +154,12 @@ class App extends React.Component {
         <SettingsForm nameForm='Paramètres' modalId='settingsFormId' nameUser={localStorage.getItem("nameUser")} 
             emailUser={localStorage.getItem("emailUser")} idUser={localStorage.getItem("idUser")}/>
 
-        <ElectionsForm nameForm='Ajouter une élection' modalId='electionFormId' idUser={localStorage.getItem("idUser")}/>
+        <ElectionsForm nameForm='Ajouter une élection' modalId='electionFormId' idUser={localStorage.getItem("idUser")} method={"POST"}/>
 
         <ElectionsList nameForm='Liste des prochaines élections' modalId='electionListId' idUser={localStorage.getItem("idUser")}/>
+        <VisionsList nameForm='Liste des visions politiques disponibles' modalId='visionsListId' idUser={localStorage.getItem("idUser")}/>
 
-        <VisionForm nameForm='Ajouter une vision politique' modalId='visionFormId' idUser={localStorage.getItem("idUser")}/>
+        <VisionForm nameForm='Ajouter une vision politique' modalId='visionFormId' idUser={localStorage.getItem("idUser")} method={"POST"}/>
         
         <div class="modal fade" show={this.state.showModal} id="LoginFormId" tabindex="-1" role="dialog" aria-labelledby="LoginModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" role="document">

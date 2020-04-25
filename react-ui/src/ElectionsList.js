@@ -9,17 +9,19 @@ class ElectionsList extends React.Component {
 
 
     componentDidMount() {
-        fetch('http://localhost:5000/getAllElections')
-            .then(res => res.json())
-            .then(data => {
-                this.setState({results: data});
-                console.log(data);
-            });
+        if(localStorage.getItem("idUser") != null) {
+            fetch('http://localhost:5000/getAllElections')
+                .then(res => res.json())
+                .then(data => {
+                    this.setState({results: data});
+                    console.log(data);
+                });
+        }
     }
 
     render() {
         const lignes = this.state.results.map((ligne) => 
-            <ElectionTableList idElection={ligne.idElection} nomElection={ligne.nomElection} dateElection={ligne.dateElection}
+            <ElectionTableList key={ligne.idElection.toString()} idElection={ligne.idElection} nomElection={ligne.nomElection} dateElection={ligne.dateElection}
                 idLocalisation={ligne.idLocalisation} tourElection={ligne.tourElection} nameLocalisation={ligne.nameLocalisation}/>) 
 
         return(
