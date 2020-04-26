@@ -4,6 +4,7 @@ const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
 const request = require('request') 
 const { Client } = require('pg');
+const { addSlashes, stripSlashes } = require('slashes');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const isDev = process.env.NODE_ENV !== 'production';
@@ -418,7 +419,7 @@ else {
 
   app.delete('/deleteVision', function(request, response){
     var idVision = request.body.vision.idVision;
-    console.log(idVision);
+    //console.log(idVision);
     var data = { message: '', success: false };
     const client = new Client(clientLogins)
     client.connect();
@@ -434,7 +435,7 @@ else {
   app.put('/updateVision', function(request, response){
     var idVision = request.body.vision.idVision;
     var nomVision = request.body.vision.nomVision;
-    console.log(request.body.vision);
+    //console.log(request.body.vision);
     var data = { message: '', success: false };
     if(nomVision.length == 0) {
       data.message = "Veuillez indiquez le nom de la vision politique souhaitée";
@@ -444,7 +445,7 @@ else {
       const client = new Client(clientLogins);
       client.connect();
       const query = `UPDATE users.vision SET "nomVision" = '${nomVision}' WHERE "idVision" = ${idVision}`;
-      console.log(query);
+      //console.log(query);
       client.query(query, (err1, res1) => {
         console.log(err1, res1);
         data.message = "La vision politique a été modifiée avec succès.";
@@ -478,6 +479,55 @@ else {
         client.end();
       });
     }
+  });
+
+  app.post('/getElectionsByLocalisation', function(request, response){
+    const idLocalisation = request.body.election.idLocalisation;
+    const client = new Client(clientLogins)
+    client.connect();
+    const query = `SELECT * FROM users.elections e, users.localisation l 
+        WHERE e."idLocalisation" = l."idLocalisation" AND e."dateElection" > NOW() AND e."idLocalisation" = ${idLocalisation}`
+    console.log(query);
+    client.query(query, (err, res1) => {
+      if (err) throw err;
+      var data = res1.rows;
+      console.log(data);
+      response.send(data)
+      client.end();
+    });
+  });
+
+  app.post('/addProcurant', function(request, response){
+    console.log(request.body.procurant);
+    var idUser = request.body.procurant.idUser;
+    var idElection = request.body.procurant.idElection;
+    var descriptionProcurant =  addSlashes(request.body.procurant.descriptionProcurant.trim());
+    const client1 = new Client(clientLogins);
+    client1.connect()
+    const query1 = `SELECT COUNT(*) FROM users.procurant where "idUser" = ${idUser} AND "idElection" = ${idElection}`;
+    console.log(query1);
+    var data = { message: '', success: false };
+    client1.query(query1, (err1, res1) => {
+      if(res1.rows[0].count > 0) {
+        data.message = "Vous avez déjà proposé vos services pour cette élection.";
+        response.send(data);
+      }
+      else {
+        const client2 = new Client(clientLogins);
+        client2.connect();
+        data.message = "La demande a été enregistrée avec succès";
+        data.success = true;
+        const query2 = `INSERT INTO users.procurant("idUser", "idElection", "descriptionProcurant") 
+            VALUES (${idUser}, ${idElection}, E'${descriptionProcurant}')`;
+        console.log(query2);
+        client2.query(query2, (err2, res2) => {
+          if (err2) throw err2;
+          response.send(data)
+          client2.end();
+        });
+      }
+      client1.end();
+    });
   });
 
 

@@ -7,6 +7,7 @@ import VisionForm from './VisionForm';
 import MaVisionForm from './MaVisionForm';
 import ElectionsList from './ElectionsList';
 import VisionsList from './VisionsList';
+import ProcurationForm from './ProcurationForm'
 import './App.css';
 
 class App extends React.Component {
@@ -120,6 +121,7 @@ class App extends React.Component {
             <ul class="navbar-nav mr-auto">
               <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#">Accueil <span className="sr-only">(current)</span></button></li>
               <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#">Informations</button></li>
+              {localStorage.getItem("idLocalisation") != null && <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#procurantFormId">Être Procurant</button></li>}
               {localStorage.getItem("idUser") == null && <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#registrationFormId">S'enregistrer</button></li>}
               {localStorage.getItem("idUser") == null && <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#LoginFormId">Se connecter</button></li>}
               {localStorage.getItem("isAdmin") == 1 && 
@@ -154,6 +156,7 @@ class App extends React.Component {
         <IdentityForm nameForm='Mon identité' modalId='identityFormId' idUser={localStorage.getItem("idUser")} 
            firstnameUser={localStorage.getItem("firstnameUser")}  lastnameUser={localStorage.getItem("lastnameUser")}  idLocalisation={localStorage.getItem("idLocalisation")}/>
 
+        <ProcurationForm nameForm='Etre Procurant' modalId='procurantFormId' idLocalisation={localStorage.getItem("idLocalisation")}/>
 
         <UserForm nameForm='Inscription' modalId='registrationFormId'/>
 
