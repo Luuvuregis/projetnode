@@ -68,7 +68,7 @@ else {
       data.isAdmin = sessionstorage.getItem("isAdmin");
       data.idVision1 = sessionstorage.getItem("idVision1");
       data.idVision2 = sessionstorage.getItem("idVision2");
-      data.idVision2 = sessionstorage.getItem("phoneUser");
+      data.phoneUser = sessionstorage.getItem("phoneUser");
     }
     res.send(data);
   });
@@ -561,7 +561,7 @@ else {
         from users.procurant pr,  users.users u, users.localisation l, users.vision v1, users.vision v2
         where pr."idElection" = ${idElection} AND pr."idUser" = u."idUser" 
           AND u."idVision1" = v1."idVision" AND u."idVision2" = v2."idVision"
-          AND u."idLocalisation" = l."idLocalisation" AND pr."idUser" != ${idUser}`;
+          AND u."idLocalisation" = l."idLocalisation" AND pr."idUser" != ${idUser} `;
 
     //REQUETE 1
     const client = new Client(clientLogins)
