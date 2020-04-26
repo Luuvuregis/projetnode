@@ -56,7 +56,7 @@ else {
   // Answer API requests.
   app.get('/', function (req, res) {
     var data = {connected: false, idUser: '', nameUser: '', emailUser: '',
-    firstnameUser: '', lastnameUser:'', idLocalisation:'', isAdmin: '', idVision1: 0, idVision2: 0};
+    firstnameUser: '', lastnameUser:'', idLocalisation:'', isAdmin: '', idVision1: 0, idVision2: 0, phoneUser: ''};
     if(sessionstorage.getItem("idUser") != null) {
       data.connected = true;
       data.idUser = sessionstorage.getItem("idUser");
@@ -68,6 +68,7 @@ else {
       data.isAdmin = sessionstorage.getItem("isAdmin");
       data.idVision1 = sessionstorage.getItem("idVision1");
       data.idVision2 = sessionstorage.getItem("idVision2");
+      data.idVision2 = sessionstorage.getItem("phoneUser");
     }
     res.send(data);
   });
@@ -126,8 +127,8 @@ else {
           client2.connect();
           bcrypt.hash(pwdUser, saltRounds)
           .then(function(hash) {
-            const queryRegister = `INSERT INTO users.users("nameUser", "pwdUser", "emailUser", "firstnameUser", "lastnameUser", "idLocalisation", "isAdmin", "idVision1", "idVision2") 
-                                    VALUES ('${nameUser}', '${hash}', '${emailUser}', '', '', 0, 0, 0, 0)`;
+            const queryRegister = `INSERT INTO users.users("nameUser", "pwdUser", "emailUser", "firstnameUser", "lastnameUser", "idLocalisation", "isAdmin", "idVision1", "idVision2", "phoneUser") 
+                                    VALUES ('${nameUser}', '${hash}', '${emailUser}', '', '', 0, 0, 0, 0, '')`;
             client2.query(queryRegister, (err1, res3) => {console.log(err1, res3); client2.end();});
             response.send(JSON.stringify(data));
           });
@@ -151,7 +152,7 @@ else {
     client.connect();
     client.query(query, (err, res1) => {
       var data = {message : 'Password/Pseudo are wrong', success: false, idUser: '', nameUser: '', emailUser: '',
-        firstnameUser: '', lastnameUser:'', idLocalisation:'', isAdmin: ''};
+        firstnameUser: '', lastnameUser:'', idLocalisation:'', isAdmin: '', idVision1: 0, idVision2: 0, phoneUser: ''};
       if(res1.rows.length == 1) {
         var hash = res1.rows[0].pwdUser
         bcrypt.compare(pwdUser, hash).then(function(result) {
@@ -166,6 +167,9 @@ else {
             data.lastnameUser = res1.rows[0].lastnameUser;
             data.idLocalisation = res1.rows[0].idLocalisation;
             data.isAdmin = res1.rows[0].isAdmin;
+            data.idVision1 = res1.rows[0].idVision1;
+            data.idVision2 = res1.rows[0].idVision2;
+            data.phoneUser = res1.rows[0].phoneUser;
             console.log(data.isAdmin);
             sessionstorage.setItem("idUser", data.idUser);
             sessionstorage.setItem("nameUser", data.nameUser);
@@ -176,6 +180,7 @@ else {
             sessionstorage.setItem("isAdmin", data.isAdmin);
             sessionstorage.setItem("idVision1", data.idVision1);
             sessionstorage.setItem("idVision2", data.idVision2);
+            sessionstorage.setItem("phoneUser", data.phoneUser);
             sessionstorage.setItem("connected", true);
           }
           response.send(data);
@@ -274,11 +279,17 @@ else {
     const firstnameUser = request.body.identity.firstnameUser.trim();
     const lastnameUser = request.body.identity.lastnameUser.trim();
     const idLocalisation = request.body.identity.idLocalisation;
-    console.log(idUser);
+    const phoneUser = request.body.identity.phoneUser.trim();
+    console.log(phoneUser);
     var data = { message: '', success: false };
     var digitsRegex = /\d+/;
+    var onlyDigitsRegex = /^\d+$/;
     if(firstnameUser.match(digitsRegex) != null || lastnameUser.match(digitsRegex) != null) {
       data.message = "Pas de chiffres dans votre nom/prenom.";
+      response.send(data);
+    }
+    else if(!onlyDigitsRegex.test(phoneUser)){
+      data.message = "Votre numero de téléphone ne doit contenir que des chiffres.";
       response.send(data);
     }
     else if(idLocalisation == 0) {
@@ -288,8 +299,9 @@ else {
     else {
       var firstnameParams = firstnameUser.length == 0 ? '' : `"firstnameUser" = '${firstnameUser}',`;
       var laststnameParams = lastnameUser.length == 0 ? '' : `"lastnameUser" = '${lastnameUser}',`;
+      var phoneUserParams = phoneUser.length != 10 ? '' : `"phoneUser" = ${phoneUser},`;
       var idLocalisationParams = `"idLocalisation" = ${idLocalisation}`;
-      const query = `UPDATE users.users SET ${firstnameParams} ${laststnameParams} ${idLocalisationParams} WHERE "idUser" = ${idUser}`;
+      const query = `UPDATE users.users SET ${firstnameParams} ${laststnameParams} ${phoneUserParams} ${idLocalisationParams}  WHERE "idUser" = ${idUser}`;
       console.log(query);
       const client = new Client(clientLogins);
       client.connect();
@@ -300,6 +312,7 @@ else {
         sessionstorage.setItem("firstnameUser", firstnameUser);
         sessionstorage.setItem("lastnameUser", lastnameUser);
         sessionstorage.setItem("idLocalisation", idLocalisation);
+        sessionstorage.setItem("phoneUser", phoneUser);
         response.send(data);
         client.end();
       });
@@ -473,6 +486,8 @@ else {
       console.log(query);
       client.query(query, (err1, res1) => {
         console.log(err1, res1);
+        sessionstorage.setItem("idVision1", idVision1);
+        sessionstorage.setItem("idVision2", idVision2);
         data.message = "Les changements ont été appliqués.";
         data.success = true;
         response.send(data);
@@ -527,6 +542,88 @@ else {
         });
       }
       client1.end();
+    });
+  });
+
+  app.post('/getProcurants', function(request, response){
+    const idUser = request.body.procurant.idUser;
+    const idElection = request.body.procurant.idElection;
+    const idVision1 = request.body.procurant.idVision1;
+    const idVision2 = request.body.procurant.idVision2;
+    const idLocalisation = request.body.procurant.idLocalisation;
+    console.log(request.body.procurant);
+    var data = { message: '', success: false, infos: [] };
+    var infosSet = new Set();
+    const query = 
+      `SELECT "idProcurant", pr."idUser", u."idVision1", u."idVision2", "descriptionProcurant", u."phoneUser",
+          u."firstnameUser", l."idLocalisation", l."nameLocalisation", 
+          v1."nomVision" as "nomVision1", v2."nomVision" as "nomVision2"
+        from users.procurant pr,  users.users u, users.localisation l, users.vision v1, users.vision v2
+        where pr."idElection" = ${idElection} AND pr."idUser" = u."idUser" 
+          AND u."idVision1" = v1."idVision" AND u."idVision2" = v2."idVision"
+          AND u."idLocalisation" = l."idLocalisation" AND pr."idUser" != ${idUser}`;
+
+    //REQUETE 1
+    const client = new Client(clientLogins)
+    client.connect();
+    var firstCondition = `AND u."idVision1" = ${idVision1} AND u."idVision2" = ${idVision2}`
+    client.query(query + firstCondition, (err1, res1) => {
+      console.log(query + firstCondition);
+      if (err1) throw err1;
+      for (let row of res1.rows) {
+        infosSet.add(row);
+      }
+
+      //REQUETE 2
+      const client2 = new Client(clientLogins)
+      client2.connect();
+      var secondCondition = `AND (u."idVision1" = ${idVision1} OR u."idVision2" = ${idVision2})`
+      client2.query(query + secondCondition, (err2, res2) => {
+        if (err2) throw err2;
+        for (let row of res2.rows) {
+          infosSet.add(row);
+        }
+
+        //REQUETE 4
+        const client4 = new Client(clientLogins)
+        client4.connect();
+        var thirdCondition = `AND (u."idVision1" = ${idVision2} OR u."idVision2" = ${idVision1})`
+        client4.query(query + thirdCondition, (err4, res4) => {
+          if (err4) throw err4;
+          for (let row of res4.rows) {
+            infosSet.add(row);
+          }
+
+          if(infosSet.length == 0) {
+            //REQUETE3
+            const client3 = new Client(clientLogins)
+            client3.connect();
+            client3.query(query, (err3, res3) => {
+              if (err3) throw err3;
+              for (let row of res3.rows) {
+                infosSet.add(row);
+              }
+              data.success = true;
+              data.message = "Voici le resultat des recherches";
+              data.infos = [...infosSet];
+              response.send(data);
+              client3.end();
+              client4.end();
+              client2.end();
+              client.end();
+            });
+          }
+          else {
+            data.success = true;
+              data.message = "Voici le resultat des recherches";
+              data.infos = [...infosSet];
+              response.send(data);
+              client4.end();
+              client2.end();
+              client.end();
+          }
+        });
+      });
     });
   });
 

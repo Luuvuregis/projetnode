@@ -8,6 +8,7 @@ import MaVisionForm from './MaVisionForm';
 import ElectionsList from './ElectionsList';
 import VisionsList from './VisionsList';
 import ProcurationForm from './ProcurationForm'
+import FindProcurant from './FindProcurant';
 import './App.css';
 
 class App extends React.Component {
@@ -53,6 +54,7 @@ class App extends React.Component {
           localStorage.setItem("isAdmin", data.isAdmin);
           localStorage.setItem("idVision1", data.idVision1);          
           localStorage.setItem("idVision2", data.idVision2);
+          localStorage.setItem("phoneUser", data.phoneUser);
           var welcomeMessage = "Bonjour " + localStorage.getItem("firstnameUser") + ' ' + localStorage.getItem("lastnameUser").charAt(0) + ".";
           localStorage.setItem("welcomeMessage", welcomeMessage);
           //document.location.reload(true);
@@ -88,8 +90,10 @@ class App extends React.Component {
           localStorage.setItem("lastnameUser", data.lastnameUser);
           localStorage.setItem("idLocalisation", data.idLocalisation);
           localStorage.setItem("isAdmin", data.isAdmin);
+          
           localStorage.setItem("idVision1", data.idVision1);          
           localStorage.setItem("idVision2", data.idVision2);
+          localStorage.setItem("phoneUser", data.phoneUser);
           console.log(data);
           var welcomeMessage = "Bonjour " + localStorage.getItem("firstnameUser") + ' ' + localStorage.getItem("lastnameUser").charAt(0) + ".";
           localStorage.setItem("welcomeMessage", welcomeMessage);
@@ -102,14 +106,6 @@ class App extends React.Component {
 
   render() {
 
-    let messageInfo;
-    if(localStorage.getItem("firstnameUser") == null) {
-      messageInfo = <p>Please refer your location in your profile </p> 
-    }
-    else
-      messageInfo =  <p>Search everything </p> 
-
-
     return (
       <div>
         <nav class="navbar navbar-expand-lg nnavbar-dark bg-dark">
@@ -121,7 +117,15 @@ class App extends React.Component {
             <ul class="navbar-nav mr-auto">
               <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#">Accueil <span className="sr-only">(current)</span></button></li>
               <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#">Informations</button></li>
-              {localStorage.getItem("idLocalisation") != null && <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#procurantFormId">Être Procurant</button></li>}
+              {localStorage.getItem("idLocalisation") != null && 
+                <li class="nav-item dropdown custom-nav">
+                <button class="nav-link dropdown-toggle customNavLink" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false">Procurations</button>
+                <div class="dropdown-menu">
+                  <button className="dropdown-item" href="#" data-toggle="modal" data-target="#procurantFormId">Être Procurant</button>
+                  <button className="dropdown-item" href="#" data-toggle="modal" data-target="#findProcurantId">Chercher un Procurant</button>
+                </div>
+              </li>}
+              
               {localStorage.getItem("idUser") == null && <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#registrationFormId">S'enregistrer</button></li>}
               {localStorage.getItem("idUser") == null && <li class="nav-item custom-nav"><button className="nav-item nav-link customNavLink" href="#" data-toggle="modal" data-target="#LoginFormId">Se connecter</button></li>}
               {localStorage.getItem("isAdmin") == 1 && 
@@ -151,10 +155,11 @@ class App extends React.Component {
           </div>
         </nav>
 
-        {messageInfo}
+        <span class="spanTitle">TROUVE TON PROCURANT</span> 
 
         <IdentityForm nameForm='Mon identité' modalId='identityFormId' idUser={localStorage.getItem("idUser")} 
-           firstnameUser={localStorage.getItem("firstnameUser")}  lastnameUser={localStorage.getItem("lastnameUser")}  idLocalisation={localStorage.getItem("idLocalisation")}/>
+           firstnameUser={localStorage.getItem("firstnameUser")}  lastnameUser={localStorage.getItem("lastnameUser")}  
+           idLocalisation={localStorage.getItem("idLocalisation")} phoneUser={localStorage.getItem("phoneUser")}/>
 
         <ProcurationForm nameForm='Etre Procurant' modalId='procurantFormId' idLocalisation={localStorage.getItem("idLocalisation")}/>
 
@@ -172,6 +177,8 @@ class App extends React.Component {
 
         
         <MaVisionForm nameForm='Ma vision politique' modalId='maVisionFormId' idUser={localStorage.getItem("idUser")}/>
+
+        <FindProcurant nameForm='Trouver un procurant' modalId='findProcurantId' idUser={localStorage.getItem("idUser")}/>
         
         <div class="modal fade" show={this.state.showModal} id="LoginFormId" tabindex="-1" role="dialog" aria-labelledby="LoginModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" role="document">

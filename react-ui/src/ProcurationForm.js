@@ -44,20 +44,24 @@ class ProcurationForm extends React.Component {
 
 
     componentDidMount() {
-        fetch('/getElectionsByLocalisation', {method: "POST", headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                election: {
-                    idUser: localStorage.getItem("idUser"),
-                    idLocalisation : localStorage.getItem("idLocalisation"),
-                }
+        if(localStorage.getItem("idLocalisation") !== 0){
+            fetch('/getElectionsByLocalisation', {method: "POST", headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    election: {
+                        idUser: localStorage.getItem("idUser"),
+                        idLocalisation : localStorage.getItem("idLocalisation"),
+                    }
+                })
             })
-        })
-        .then(res => res.json())
-        .then(data => {
-            console.log(data);
-            this.setState({value: data[0].idElection})
-            this.setState({results:data});
-        });
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                if(data.length > 0) {
+                    this.setState({value: data[0].idElection})
+                }
+                this.setState({results:data});
+            });
+        }
     }
 
     render() {

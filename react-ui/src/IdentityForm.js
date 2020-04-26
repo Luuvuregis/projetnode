@@ -4,6 +4,7 @@ class IdentityForm extends React.Component {
     constructor(props) {
         super(props);
         this.state = {firstnameUser: '', lastnameUser: '', currentNameLocalisation: '', idLocalisation: this.props.idLocalisation, nameLocalisation: '',
+            phoneUser: '',
             localisations : [{"idLocalisation":0, "nameLocalisation":'Choose a localisation'}],
             alertIdentityClass: '', alertIdentityMessage: ''
         };
@@ -12,8 +13,10 @@ class IdentityForm extends React.Component {
         this.handleIdentityChangeLastname = this.handleIdentityChangeLastname.bind(this);
         this.handleIdentitySubmit = this.handleIdentitySubmit.bind(this);
         this.handleChangeLocalisation = this.handleChangeLocalisation.bind(this);
+        this.handleIdentityChangePhone = this.handleIdentityChangePhone.bind(this);
     }
 
+    handleIdentityChangePhone(event) {this.setState({phoneUser: event.target.value})}
     handleIdentityChangeFirstname(event) {this.setState({firstnameUser: event.target.value})}
     handleIdentityChangeLastname(event) {this.setState({lastnameUser: event.target.value})}
     handleChangeLocalisation(event) {
@@ -26,7 +29,8 @@ class IdentityForm extends React.Component {
                     idUser: this.props.idUser,
                     firstnameUser: this.state.firstnameUser,
                     lastnameUser: this.state.lastnameUser,
-                    idLocalisation: this.state.idLocalisation
+                    idLocalisation: this.state.idLocalisation,
+                    phoneUser: this.state.phoneUser
                 }
             })
         })
@@ -38,6 +42,7 @@ class IdentityForm extends React.Component {
             localStorage.setItem("firstnameUser", this.state.firstnameUser);
             localStorage.setItem("lastnameUser", this.state.lastnameUser);
             localStorage.setItem("idLocalisation", this.state.idLocalisation);
+            localStorage.setItem("phoneUser", this.state.phoneUser);
             this.setState({currentNameLocalisation: this.state.localisations[this.state.idLocalisation].nameLocalisation});
           }
           else this.setState({alertIdentityClass:"alert alert-danger"});
@@ -81,6 +86,10 @@ class IdentityForm extends React.Component {
                             <label for="InputEmail"> Votre nom de famille : <input type="text" value={this.state.lastnameUser} placeholder={this.props.lastnameUser} onChange={this.handleIdentityChangeLastname} class="form-control form-control-lg"/></label>
                         </div>
 
+                        <div class="form-group">
+                            <label for="InputPhone"> Votre téléphone : <input type="text" value={this.state.phoneUser} placeholder={this.props.phoneUser} onChange={this.handleIdentityChangePhone} class="form-control form-control-lg"/></label>
+                        </div>
+
                         <p> Votre localisation actuelle</p>
                         <div class="input-group mb-3">
                             <input type="text" class="form-control" placeholder={this.state.currentNameLocalisation} aria-label="Name Localisation" aria-describedby="button-addon2" readOnly/>
@@ -96,7 +105,7 @@ class IdentityForm extends React.Component {
                         </div>
 
                         <div class="form-group">
-                            <span role="alert" class={this.state.alertIdentityClass}>{this.state.alertIdentityMessage}</span>
+                            <div role="alert" class={this.state.alertIdentityClass}>{this.state.alertIdentityMessage}</div>
                         </div>
 
                         <br/>
